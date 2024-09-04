@@ -1,20 +1,47 @@
 package com.jordan.agendaTelefonica.controller;
 
-import com.jordan.agendaTelefonica.domain.contact.DataCreateContact;
+import com.jordan.agendaTelefonica.domain.contact.*;
 import jakarta.transaction.Transactional;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("contacts")
 public class ContactController {
 
+    @Autowired
+    private ContactRepository contactRepository;
+
     @PostMapping
     @Transactional
-    public String createContact(@RequestBody DataCreateContact data) {
+    public ResponseEntity createContact(@RequestBody @Valid DataCreateContact data, UriComponentsBuilder uriBuilder) {
+        var contact = new Contact(data);
         System.out.println(data);
-        return createContact(data);
+        contactRepository.save(contact);
+
+        var uri = uriBuilder.path("/contacts/{id}").buildAndExpand(contact.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new DataDetailsContact(contact));
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<DataListContact>> listContact(@PageableDefault(size = 10, sort = {"name"})Pageable pagination) {
+        var page = contactRepository.findAll(pagination).map(DataListContact::new);
+        return ResponseEntity.ok(page);
+    }
+
+    @PutMapping
+    @Transactional
+    public ResponseEntity updateContact(@RequestBody @Valid DataUpdateContact data) {
+        var contact = contactRepository.getReferenceById(data.id());
+        contact.updateInformation(data);
+
+        return  ResponseEntity.ok(new DataDetailsContact(contact));
     }
 }
