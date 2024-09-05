@@ -44,4 +44,16 @@ public class ContactController {
 
         return  ResponseEntity.ok(new DataDetailsContact(contact));
     }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity deleteContact(@PathVariable Long id) {
+        var contact = contactRepository.findById(id);
+        if (contact.isPresent()) {
+            contactRepository.delete(contact.get());
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
