@@ -1,6 +1,10 @@
 package com.jordan.agendaTelefonica.controller;
 
-import com.jordan.agendaTelefonica.domain.contact.*;
+import com.jordan.agendaTelefonica.dto.CreateContactDto;
+import com.jordan.agendaTelefonica.dto.ListContactDto;
+import com.jordan.agendaTelefonica.dto.UpdateContactDto;
+import com.jordan.agendaTelefonica.infra.excepition.ValidationExcepition;
+import com.jordan.agendaTelefonica.service.ContactService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,44 +20,45 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class ContactController {
 
     @Autowired
-    private ContactRepository contactRepository;
+    private ContactService contactService;
 
     @PostMapping
     @Transactional
-    public ResponseEntity createContact(@RequestBody @Valid DataCreateContact data, UriComponentsBuilder uriBuilder) {
-        var contact = new Contact(data);
-        System.out.println(data);
-        contactRepository.save(contact);
-
-        var uri = uriBuilder.path("/contacts/{id}").buildAndExpand(contact.getId()).toUri();
-
-        return ResponseEntity.created(uri).body(new DataDetailsContact(contact));
+    public ResponseEntity createContact(@RequestBody @Valid CreateContactDto data, UriComponentsBuilder uriBuilder) {
+        try {
+            contactService.createContact(data, uriBuilder);
+            return ResponseEntity.ok().build();
+        }catch (ValidationExcepition excepition) {
+            return ResponseEntity.badRequest().body(excepition.getMessage());
+        }
     }
 
     @GetMapping
-    public ResponseEntity<Page<DataListContact>> listContact(@PageableDefault(size = 10, sort = {"name"})Pageable pagination) {
-        var page = contactRepository.findAll(pagination).map(DataListContact::new);
-        return ResponseEntity.ok(page);
+    public ResponseEntity<Page<ListContactDto>> listContact(
+            @PageableDefault(size = 10, sort = {"name"}) Pageable pagination) {
+        Page<ListContactDto> contact = contactService.listContact(pagination);
+        return ResponseEntity.ok(contact);
     }
 
     @PutMapping
     @Transactional
-    public ResponseEntity updateContact(@RequestBody @Valid DataUpdateContact data) {
-        var contact = contactRepository.getReferenceById(data.id());
-        contact.updateInformation(data);
-
-        return  ResponseEntity.ok(new DataDetailsContact(contact));
+    public ResponseEntity updateContact(@RequestBody @Valid UpdateContactDto data) {
+        try {
+            contactService.updateContact(data);
+            return ResponseEntity.ok().build();
+        }catch (ValidationExcepition excepition) {
+            return ResponseEntity.badRequest().body(excepition.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity deleteContact(@PathVariable Long id) {
-        var contact = contactRepository.findById(id);
-        if (contact.isPresent()) {
-            contactRepository.delete(contact.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+        try {
+            contactService.deleteContact(id);
+            return ResponseEntity.ok().build();
+        }catch (ValidationExcepition excepition) {
+            return ResponseEntity.badRequest().body(excepition.getMessage());
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.jordan.agendaTelefonica.infra.security;
 
-import com.jordan.agendaTelefonica.domain.user.UserRepository;
+import com.jordan.agendaTelefonica.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

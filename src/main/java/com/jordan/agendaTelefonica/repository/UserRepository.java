@@ -1,9 +1,12 @@
-package com.jordan.agendaTelefonica.domain.user;
+package com.jordan.agendaTelefonica.repository;
 
+import com.jordan.agendaTelefonica.domain.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    UserDetails findByLogin(String login);
+    User findByLogin(String login);
+
+    boolean existsByLogin(String login);
 }

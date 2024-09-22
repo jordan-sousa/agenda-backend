@@ -1,10 +1,11 @@
-package com.jordan.agendaTelefonica.domain.contact;
+package com.jordan.agendaTelefonica.dto;
 
+import com.jordan.agendaTelefonica.domain.contact.Contact;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
-public record DataCreateContact(
+public record CreateContactDto(
                                 @NotBlank
                                 String name,
 
@@ -14,10 +15,8 @@ public record DataCreateContact(
 
                                 @NotBlank
                                 @Email
-                                String email,
-
-                                String image) {
-    public DataCreateContact(Contact contact) {
-        this(contact.getName(), contact.getPhone(), contact.getEmail(), contact.getImage());
+                                String email) {
+    public CreateContactDto(Contact contact) {
+        this(contact.getName(), contact.getPhone(), contact.getEmail());
     }
 }

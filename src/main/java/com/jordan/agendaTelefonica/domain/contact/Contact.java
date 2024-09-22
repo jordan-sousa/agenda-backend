@@ -1,5 +1,7 @@
 package com.jordan.agendaTelefonica.domain.contact;
 
+import com.jordan.agendaTelefonica.dto.CreateContactDto;
+import com.jordan.agendaTelefonica.dto.UpdateContactDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -20,13 +22,11 @@ public class Contact {
     private String name;
     private String phone;
     private String email;
-    private String image;
 
-    public Contact(DataCreateContact data) {
+    public Contact(CreateContactDto data) {
         this.name = data.name();
         this.phone = data.phone();
         this.email = data.email();
-        this.image = data.image();
     }
 
     public Long getId() {
@@ -57,15 +57,8 @@ public class Contact {
         this.email = email;
     }
 
-    public String getImage() {
-        return image;
-    }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public void updateInformation(DataUpdateContact data) {
+    public void updateInformation(UpdateContactDto data) {
         if (data.name() != null) {
             this.name = data.name();
         }
