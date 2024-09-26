@@ -43,13 +43,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // CORS habilitado
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();  // Permitir OPTIONS para todos os endpoints
-                    req.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();  // Permitir POST para /auth/register
-                    req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();  // Permitir POST para /auth/login
-                    req.anyRequest().authenticated();  // Autenticação requerida para outros endpoints
+                    req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
+                    req.requestMatchers(HttpMethod.PUT, "/contacts/**").authenticated();
+                    req.anyRequest().authenticated();
                 })
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

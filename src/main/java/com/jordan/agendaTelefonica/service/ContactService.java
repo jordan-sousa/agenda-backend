@@ -7,6 +7,7 @@ import com.jordan.agendaTelefonica.dto.ListContactDto;
 import com.jordan.agendaTelefonica.dto.UpdateContactDto;
 import com.jordan.agendaTelefonica.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +35,16 @@ public class ContactService {
         return contactRepository.findAll(pagination).map(ListContactDto::new);
     }
 
-    public ResponseEntity updateContact(UpdateContactDto data) {
-        var contact = contactRepository.getReferenceById(data.id());
-        contact.updateInformation(data);
+    public ResponseEntity<DetailsContactDto> updateContact(Long id, UpdateContactDto data) throws ChangeSetPersister.NotFoundException {
+        // Usar findById para garantir que o contato exista
+        var contact = contactRepository.findById(id)
+                .orElseThrow(() -> new ChangeSetPersister.NotFoundException()); // Lança exceção 404 se o contato não for encontrado
 
-        return  ResponseEntity.ok(new DetailsContactDto(contact));
+        // Atualiza informações do contato com dados do DTO
+        contact.updateInformation(data);
+        contactRepository.save(contact); // Salvar as mudanças feitas no contato
+
+        return ResponseEntity.ok(new DetailsContactDto(contact));
     }
 
     public ResponseEntity deleteContact(@PathVariable Long id) {

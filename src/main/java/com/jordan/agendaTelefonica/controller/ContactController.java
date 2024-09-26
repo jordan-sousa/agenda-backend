@@ -7,7 +7,9 @@ import com.jordan.agendaTelefonica.infra.excepition.ValidationExcepition;
 import com.jordan.agendaTelefonica.service.ContactService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -40,20 +42,21 @@ public class ContactController {
         return ResponseEntity.ok(contact);
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     @Transactional
-    public ResponseEntity updateContact(@RequestBody @Valid UpdateContactDto data) {
+    public ResponseEntity updateContact(@PathVariable Long id, @RequestBody @Valid UpdateContactDto data) {
         try {
-            contactService.updateContact(data);
-            return ResponseEntity.ok().build();
-        }catch (ValidationExcepition excepition) {
-            return ResponseEntity.badRequest().body(excepition.getMessage());
+            return contactService.updateContact(id, data);
+        } catch (ValidationException exception) {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        } catch (ChangeSetPersister.NotFoundException e) {
+            return ResponseEntity.notFound().build(); // Retorna 404 se não encontrado
         }
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity deleteContact(@PathVariable Long id) {
+    public ResponseEntity deleteContact(Long id) {
         try {
             contactService.deleteContact(id);
             return ResponseEntity.ok().build();
